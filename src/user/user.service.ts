@@ -1,4 +1,3 @@
-
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -43,6 +42,14 @@ export class UserService {
         id: id,
       },
       data: updateUserDto,
+    });
+  }
+
+  findByEmail(email: string) {
+    return this.prisma.user.findFirst({
+      where: {
+        email,
+      },
     });
   }
 
