@@ -1,9 +1,7 @@
-import { Model } from 'mongoose';
-import { InjectModel } from '@nestjs/mongoose';
+
 import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User, UserDocument } from './entities/user.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
@@ -28,26 +26,27 @@ export class UserService {
   }
 
   findAll() {
-    return this.findAll();
+    return this.prisma.user.findMany();
   }
 
   findOne(id: string) {
-    return this.findOne(id);
+    return this.prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+    });
   }
 
-  // update(id: string, updateUserDto: UpdateUserDto) {
-  //   return this.findOne(
-  //     { _id: id },
-  //     {
-  //       $set: updateUserDto,
-  //     },
-  //     {
-  //       new: true,
-  //     },
-  //   );
-  // }
+  update(id: string, updateUserDto: UpdateUserDto) {
+    return this.prisma.user.update({
+      where: {
+        id: id,
+      },
+      data: updateUserDto,
+    });
+  }
 
-  // remove(id: string) {
-  //   return this.userModel.deleteOne({ _id: id }).exec();
-  // }
+  remove(id: string) {
+    return this.prisma.user.delete({ where: { id: id } });
+  }
 }
