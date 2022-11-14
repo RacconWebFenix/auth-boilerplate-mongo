@@ -10,10 +10,17 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Role {
+  id     String @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  roleId String @unique @db.ObjectId
+  User   User[]
+}
+
 model User {
-  id String @id @default(auto()) @map("_id") @db.ObjectId
-  
-  name String
-  email String
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  name     String
+  email    String
   password String
+  role     Role   @relation(fields: [id], references: [roleId])
 }
