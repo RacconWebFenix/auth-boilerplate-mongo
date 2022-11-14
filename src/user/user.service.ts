@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -25,24 +25,40 @@ export class UserService {
   }
 
   findAll() {
-    return this.prisma.user.findMany();
+    const data = this.prisma.user.findMany().then((data) =>
+      data.map((d) => ({
+        ...d,
+        password: undefined,
+      })),
+    );
+    return data;
   }
 
   findOne(id: string) {
-    return this.prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-    });
+    return this.prisma.user
+      .findUnique({
+        where: {
+          id: id,
+        },
+      })
+      .then((data) => ({ ...data, password: undefined }));
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {
-    return this.prisma.user.update({
-      where: {
-        id: id,
-      },
-      data: updateUserDto,
-    });
+    return updateUserDto.password
+      ? new UnauthorizedException('password is not editable')
+      : this.prisma.user
+          .update({
+            where: {
+              id: id,
+            },
+            data: updateUserDto,
+          })
+          .then((data) => ({ ...data, password: undefined }));
+  }
+
+  remove(id: string) {
+    return this.prisma.user.delete({ where: { id: id } });
   }
 
   findByEmail(email: string) {
@@ -51,9 +67,5 @@ export class UserService {
         email,
       },
     });
-  }
-
-  remove(id: string) {
-    return this.prisma.user.delete({ where: { id: id } });
   }
 }
